@@ -8,10 +8,6 @@ var GameOver = cc.Layer.extend({
         this.init();
     },
     init:function () {
-        //cc.spriteFrameCache.addSpriteFrames(res.textureTransparentPack_plist);
-
-        winSize = cc.director.getWinSize();
-
         this.initBackGround();
 
         var loseGame = new ccui.Text();
@@ -36,14 +32,11 @@ var GameOver = cc.Layer.extend({
 
         var singalHeight = MW.menuHeight;
         var singalWidth = MW.menuWidth;
-        var newGameText = new ccui.Text("Press Enter to Play again", res.flappy_ttf, 20);
+        var newGameText = new ccui.Text("Press Enter to Play Again", res.flappy_ttf, 20);
 
         var newGame = new cc.MenuItemLabel(newGameText, function () {
-            //console.log("Play Game clicked");
-            this.onButtonEffect();
             this.onPlayAgain();
         }, this);
-
 
         newGame.scale = MW.SCALE;
 
@@ -53,13 +46,7 @@ var GameOver = cc.Layer.extend({
         menu.x = winSize.width / 2;
         menu.y = winSize.height / 2 - 140;
 
-
-        this.schedule(this.update, 0.1);
-
-        if (MW.SOUND) {
-            cc.audioEngine.setMusicVolume(0.7);
-            cc.audioEngine.playMusic(cc.sys.os == cc.sys.OS_WP8 || cc.sys.os == cc.sys.OS_WINRT ? res.mainMainMusic_wav : res.mainMainMusic_mp3, true);
-        }
+        this.addKeyboardListener();
 
         return true;
     },
@@ -71,24 +58,40 @@ var GameOver = cc.Layer.extend({
         loadingBG.anchorY = 0;
         loadingBG.setScale(MW.SCALE);
         this.addChild(loadingBG, 0, 1);
+
+        var ground = new cc.Sprite(res.ground_png);
+        ground.anchorX = 0;
+        ground.anchorY = 0;
+        ground.setScale(MW.SCALE);
+        this.addChild(ground, 0, 1);
     },
 
-    onButtonEffect:function(){
-        if (MW.SOUND) {
-            var s = cc.audioEngine.playEffect(cc.sys.os == cc.sys.OS_WINDOWS || cc.sys.os == cc.sys.OS_WINRT ? res.buttonEffet_wav : res.buttonEffet_mp3);
-        }
+    addKeyboardListener:function(){
+        var self = this;
+        cc.eventManager.addListener ({
+            event: cc.EventListener.KEYBOARD,
+            onKeyPressed: function(keyCode, event) {
+                if(keyCode == cc.KEY.enter) {
+                    self.onPlayAgain();
+                }
+            }
+        }, this);
     },
 
     onPlayAgain:function (pSender) {
-        cc.audioEngine.stopMusic();
-        cc.audioEngine.stopAllEffects();
-        cc.director.runScene(new cc.TransitionFade(1.2, CountdownLayer.scene()));
+        //cc.audioEngine.stopMusic();
+        //cc.audioEngine.stopAllEffects();
+        this.unscheduleAllCallbacks();
+        this.removeAllChildren(true);
+        cc.eventManager.removeListeners(cc.EventListener.KEYBOARD);
+        cc.audioEngine.playEffect(res.jump_wav);
+        cc.director.runScene(CountdownLayer.scene());
     }
 });
 
-GameOver.scene = function () {
+GameOver.scene = function (score) {
     var scene = new cc.Scene();
-    var layer = new GameOver();
+    var layer = new GameOver(score);
     scene.addChild(layer);
     return scene;
 };

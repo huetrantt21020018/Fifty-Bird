@@ -1,7 +1,7 @@
 
 
 var CountdownLayer = cc.Layer.extend({
-    _countdown: 3, // Starting countdown number
+    _countdown: 3,
     _countdownLabel: null,
 
     ctor:function () {
@@ -9,23 +9,15 @@ var CountdownLayer = cc.Layer.extend({
         this.init();
     },
     init:function () {
-        //cc.spriteFrameCache.addSpriteFrames(res.textureTransparentPack_plist);
-
         winSize = cc.director.getWinSize();
 
         this.initBackGround();
 
-        this._countdownLabel = new cc.LabelTTF(this._countdown.toString(), "Arial", 64);
+        this._countdownLabel = new cc.LabelTTF(this._countdown.toString(), res.flappy_ttf, 60);
         this._countdownLabel.setPosition(winSize.width / 2, winSize.height / 2);
         this.addChild(this._countdownLabel);
 
         this.schedule(this.updateCountdown, 1.0);
-
-        /*
-        if (MW.SOUND) {
-            cc.audioEngine.setMusicVolume(0.7);
-            cc.audioEngine.playMusic(cc.sys.os == cc.sys.OS_WP8 || cc.sys.os == cc.sys.OS_WINRT ? res.mainMainMusic_wav : res.mainMainMusic_mp3, true);
-        }*/
 
         return true;
     },
@@ -47,13 +39,22 @@ var CountdownLayer = cc.Layer.extend({
         loadingBG.anchorY = 0;
         loadingBG.setScale(MW.SCALE);
         this.addChild(loadingBG, 0, 1);
+
+        var ground = new cc.Sprite(res.ground_png);
+        ground.anchorX = 0;
+        ground.anchorY = 0;
+        ground.setScale(MW.SCALE);
+        this.addChild(ground, 0, 1);
     },
 
     onNewGame:function (pSender) {
-        //load resources
+        // load resources
         // cc.audioEngine.stopMusic();
         // cc.audioEngine.stopAllEffects();
-        cc.director.runScene(new cc.TransitionFade(1.2, GameLayer.scene()));
+        // cc.audioEngine.stopMusic();
+        this.unscheduleAllCallbacks();
+        this.removeAllChildren(true);
+        cc.director.runScene(GameLayer.scene());
     },
 });
 

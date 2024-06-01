@@ -7,32 +7,25 @@ var SysMenu = cc.Layer.extend({
         this.init();
     },
     init:function () {
-        //cc.spriteFrameCache.addSpriteFrames(res.textureTransparentPack_plist);
-
         winSize = cc.director.getWinSize();
 
         this.initBackGround();
 
-        var nameGame = new ccui.Text();
+        var nameGame = new ccui.Text("Fifty Bird", res.flappy_ttf, 48);
         nameGame.attr({
-	        string: "Fifty Bird",
-	        font: res.flappy_ttf,
-	        x: winSize.width  / 2,
-	        y: 270,
-	        fontSize: 30
+	        x: winSize.width / 2,
+	        y: winSize.height / 2,
         });
-        this.addChild(nameGame, 1);
+        nameGame.setVisible(true);
+        this.addChild(nameGame, 10);
 
         var singalHeight = MW.menuHeight;
         var singalWidth = MW.menuWidth;
-        var newGameText = new ccui.Text("Press Enter to Play", res.flappy_ttf, 20);
 
+        var newGameText = new ccui.Text("Press Enter", res.flappy_ttf, 20);
         var newGame = new cc.MenuItemLabel(newGameText, function () {
-            this.onButtonEffect();
             this.onNewGame();
         }, this);
-
-
         newGame.scale = MW.SCALE;
 
         var menu = new cc.Menu(newGame);
@@ -41,13 +34,17 @@ var SysMenu = cc.Layer.extend({
         menu.x = winSize.width / 2;
         menu.y = winSize.height / 2 - 140;
 
+        /*cc.loader.load([res.marios_way], function (err, results) {
+            if (err) {
+                cc.log("Failed to load audio file: " + err);
+            } else {
+                cc.log("Audio file loaded successfully");
+                cc.audioEngine.setMusicVolume(0.2);
+                cc.audioEngine.playMusic(res.marios_way, true);
+            }
+        }); */
 
-        this.schedule(this.update, 0.1);
-
-        if (MW.SOUND) {
-            cc.audioEngine.setMusicVolume(0.7);
-            cc.audioEngine.playMusic(cc.sys.os == cc.sys.OS_WP8 || cc.sys.os == cc.sys.OS_WINRT ? res.mainMainMusic_wav : res.mainMainMusic_mp3, true);
-        }
+        this.addKeyboardListener();
 
         return true;
     },
@@ -58,29 +55,31 @@ var SysMenu = cc.Layer.extend({
         loadingBG.anchorY = 0;
         loadingBG.setScale(MW.SCALE);
         this.addChild(loadingBG, 0, 1);
+
+        var ground = new cc.Sprite(res.ground_png);
+        ground.anchorX = 0;
+        ground.anchorY = 0;
+        ground.setScale(MW.SCALE);
+        this.addChild(ground, 0, 1);
+    },
+
+    addKeyboardListener:function(){
+        var self = this;
+        cc.eventManager.addListener ({
+            event: cc.EventListener.KEYBOARD,
+            onKeyPressed: function(keyCode, event) {
+                if(keyCode == cc.KEY.enter) {
+                    self.onNewGame();
+                    cc.audioEngine.playEffect(res.jump_wav);
+                }
+            }
+        }, this);
     },
 
     onNewGame:function (pSender) {
-        //load resources
-        cc.audioEngine.stopMusic();
         cc.audioEngine.stopAllEffects();
-        cc.director.runScene(new cc.TransitionFade(1.2, CountdownLayer.scene()));
+        cc.director.runScene(CountdownLayer.scene());
     },
-    update:function () {
-        /*if (this._ship.y > 750) {
-            this._ship.x = Math.random() * winSize.width;
-	        this._ship.y = 10;
-            this._ship.runAction(cc.moveBy(
-                parseInt(5 * Math.random(), 10),
-                cc.p(Math.random() * winSize.width, this._ship.y + 750)
-            ));
-        }*/
-    },
-    onButtonEffect:function(){
-        if (MW.SOUND) {
-            var s = cc.audioEngine.playEffect(cc.sys.os == cc.sys.OS_WINDOWS || cc.sys.os == cc.sys.OS_WINRT ? res.buttonEffet_wav : res.buttonEffet_mp3);
-        }
-    }
 });
 
 SysMenu.scene = function () {

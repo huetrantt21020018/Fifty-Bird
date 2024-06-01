@@ -1,9 +1,9 @@
-PIPE_DISTANCE_X = 150;
+PIPE_DISTANCE_X = 175;
 PIPE_DISTANCE_Y = 120;
 PIPE_HEIGHT = 288;
-PIPE_WIDTH = 70;
-TOP_MAX_Y = cc.winSize.height / 2 + PIPE_HEIGHT / 2;
-TOP_MIN_Y = - cc.winSize.height / 2 + PIPE_HEIGHT / 2 + PIPE_DISTANCE_Y;
+PIPE_WIDTH = 78;
+PADDING_X = 6;
+PADDING_Y = 12;
 
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
@@ -12,7 +12,9 @@ function getRandomArbitrary(min, max) {
 var Pipe = cc.Sprite.extend({
     topPipe: null,
     bottomPipe: null,
+    _x: null,
     _isPassed: false,
+    _isFading: false,
 
     ctor:function (x) {
         this._super();
@@ -30,47 +32,82 @@ var Pipe = cc.Sprite.extend({
     },
 
     init:function (x) {
-        TOP_MAX_Y = Math.min(3 * PIPE_HEIGHT / 2 + PIPE_DISTANCE_Y, cc.winSize.height + PIPE_HEIGHT / 2);
-        TOP_MIN_Y = cc.winSize.height - PIPE_HEIGHT / 2;
-
-    //   console.log("TOP_MAX_Y: ", TOP_MAX_Y);
-    //   console.log("TOP_MIN_Y: ", TOP_MIN_Y);
+        var gap = PIPE_DISTANCE_Y + getRandomArbitrary(-20, 20);
+        TOP_MAX_Y = Math.min(3 * PIPE_HEIGHT / 2 + gap, MW.HEIGHT + PIPE_HEIGHT / 2) - 10;
+        TOP_MIN_Y = MW.HEIGHT - PIPE_HEIGHT / 2 + 10;
 
         this.topPipe.setPosition(x, getRandomArbitrary(TOP_MIN_Y, TOP_MAX_Y));
-        this.bottomPipe.setPosition(x, this.topPipe.y - PIPE_HEIGHT - PIPE_DISTANCE_Y);
-        this.isPassed = false;
+        this.bottomPipe.setPosition(x, this.topPipe.y - PIPE_HEIGHT - gap);
+        this._isPassed = false;
+        this._x = this.topPipe.x;
 
-     //   console.log("topPipe: ", this.topPipe.y);
-      //  console.log("bottomPipe: ", this.bottomPipe.y);
-    },
-    update:function () {
-        this.topPipe.x--;
-        this.bottomPipe.x--;
-        if(this.topPipe.x + PIPE_WIDTH < 0) {
-            this.init(LAST_X_PIPE - cc.winSize.width - PIPE_WIDTH);
+        if(this._isFading) {
+            this.topPipe.stopAllActions();
+            this.topPipe.setOpacity(255);
+
+            this.bottomPipe.stopAllActions();
+            this.bottomPipe.setOpacity(255);
+            this._isFading = false;
         }
     },
-
-    isCollide:function (x, y) {
-        var birdRect = cc.rect(x, y, BIRD_WIDTH, BIRD_HEIGHT);
-        var topRect =  cc.rect(this.topPipe.x - PIPE_WIDTH / 2 + 10, this.topPipe.y - PIPE_HEIGHT / 2 + 10, PIPE_WIDTH - 20, PIPE_HEIGHT - 20);
-        var bottomRect = cc.rect(this.bottomPipe.x - PIPE_WIDTH / 2 + 10, this.bottomPipe.y - PIPE_HEIGHT / 2 + 10, PIPE_WIDTH - 20, PIPE_HEIGHT - 20);
-        if(cc.rectIntersectsRect(birdRect, topRect)) {
-            console.log("collide top pipe");
-            return true;
+    update:function (dt) {
+        if(MW.STATE != MW.GAME_STATE.PLAYING) return;
+        var deltaX = dt * GAME_SPEED;
+        if(deltaX > 3) {
+            // using dash skill --> ease action
+            var moveByT = cc.moveBy(dt, cc.p(-deltaX, 0));
+            var moveByB = cc.moveBy(dt, cc.p(-deltaX, 0));
+            this.topPipe.runAction(moveByT);
+            this.bottomPipe.runAction(moveByB);
+        } else {
+            this.topPipe.x -= deltaX;
+            this.bottomPipe.x -= deltaX;
         }
-        if(cc.rectIntersectsRect(birdRect, bottomRect)) {
-            console.log("collide bottom pipe");
-            console.log(x, y);
-            console.log(this.bottomPipe.x, this.bottomPipe.y);
+        this._x = this.topPipe.x;
+    },
+
+    isBlew: function (x, y) {
+        var birdRect = cc.rect(x - BIRD_WIDTH * 2.5, y - BIRD_HEIGHT * 2.5, BIRD_WIDTH * 5, BIRD_HEIGHT * 5);
+        var pipeRect =  cc.rect(this._x - PIPE_WIDTH / 2, 0, PIPE_WIDTH, MW.HEIGHT);
+        if(cc.rectIntersectsRect(birdRect, pipeRect)) {
             return true;
         }
         return false;
     },
 
+    blew: function() {
+        this._isFading = true;
+
+        var anim1 = cc.fadeOut(0.2);
+        var anim2 = cc.fadeOut(0.2);
+
+        this.topPipe.runAction(anim1);
+        this.bottomPipe.runAction(anim2);
+    },
+
+    isCollide:function (x, y) {
+        if(this._isFading) return false;
+
+        var birdRect = cc.rect(x - BIRD_WIDTH / 2 + PADDING_X, y - BIRD_HEIGHT / 2, BIRD_WIDTH - 2 * PADDING_X, BIRD_HEIGHT);
+        var topRect =  cc.rect(this._x - PIPE_WIDTH / 2, this.topPipe.y - PIPE_HEIGHT / 2, PIPE_WIDTH, PIPE_HEIGHT);
+        var bottomRect = cc.rect(this._x - PIPE_WIDTH / 2, this.bottomPipe.y - PIPE_HEIGHT / 2, PIPE_WIDTH, PIPE_HEIGHT);
+
+        if(cc.rectIntersectsRect(birdRect, topRect) || cc.rectIntersectsRect(birdRect, bottomRect)) {
+            return true;
+        }
+        return false;
+    },
+
+    pass: function() {
+        this._isPassed = true;
+    },
+
     isPass:function (x, y) {
         if(this._isPassed) return false;
-        this._isPassed = (x > this.topPipe.x + PIPE_WIDTH / 2 - 10);
-        return this._isPassed;
+        return (x > this._x + PIPE_WIDTH / 2);
+    },
+
+    isOutOfScreen:function (x, y) {
+        return (this._x + PIPE_WIDTH < 0);
     }
 });
