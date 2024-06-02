@@ -39,7 +39,7 @@ var Bird = cc.Sprite.extend({
             this._speed = 0;
         }, this);
 
-        var usingDash = cc.delayTime(0.2);
+        var usingDash = cc.delayTime(0.24);
 
         var deactivateDash = cc.callFunc(function() {
              this._dashStatus = MW.SKILL_STATUS.NONE;

@@ -51,15 +51,15 @@ var GameLayer = cc.Layer.extend({
         this.scheduleUpdate();
 
         // score
-        this.lbScore = new cc.LabelTTF("Score: 0", res.flappy_ttf, 24);
+        this.lbScore = new cc.LabelTTF("Score: 0", "flappy", 24);
         this.lbScore.attr({
             x: 90,
-            y: MW.HEIGHT - 40
+            y: MW.HEIGHT - 36
         });
         this.addChild(this.lbScore, 10);
 
         // Dash
-        this.lbDash = new cc.LabelTTF("DASH", res.flappy_ttf, 15);
+        this.lbDash = new cc.LabelTTF("Dash", "flappy", 15);
         this.lbDash.attr({
             x: 90,
             y: MW.HEIGHT - 70
@@ -68,7 +68,7 @@ var GameLayer = cc.Layer.extend({
         this.addChild(this.lbDash, 10);
 
         // Power
-        this.lbPower = new cc.LabelTTF("POWER", res.flappy_ttf, 15);
+        this.lbPower = new cc.LabelTTF("Power", "flappy", 15);
         this.lbPower.attr({
             x: 90,
             y: MW.HEIGHT - 100
@@ -77,7 +77,7 @@ var GameLayer = cc.Layer.extend({
         this.addChild(this.lbPower, 10);
 
         // pause
-        this.lbPause = new cc.LabelTTF("PAUSED", res.flappy_ttf, 15);
+        this.lbPause = new cc.LabelTTF("Paused", "flappy", 15);
         this.lbPause.attr({
             x:  90,
             y: MW.HEIGHT - 130
@@ -175,7 +175,7 @@ var GameLayer = cc.Layer.extend({
 
         // Kiểm tra cột đầu tiên vượt ra ngoài màn hình -> đưa cột đầu tiên xuống cuối
         if(this._pipes[this._firstPipe].isOutOfScreen()) {
-            this._pipes[this._firstPipe].init(this._pipes[this._lastPipe]._x + PIPE_DISTANCE_X + getRandomArbitrary(-10, 25));
+            this._pipes[this._firstPipe].init(this._pipes[this._lastPipe]._x + PIPE_DISTANCE_X + getRandomArbitrary(-20, 20));
             this._lastPipe = this._firstPipe;
             this._firstPipe = (this._firstPipe + 1) % this._numberOfPipe;
         }

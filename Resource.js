@@ -32,5 +32,10 @@ var g_maingame = [
     res.pipe_png,
 
     res.font_ttf,
-    res.flappy_ttf
+    res.flappy_ttf,
 ];
+
+var g_resources = [];
+for (var i in res) {
+    g_resources.push(res[i]);
+}

@@ -13,7 +13,7 @@ var CountdownLayer = cc.Layer.extend({
 
         this.initBackGround();
 
-        this._countdownLabel = new cc.LabelTTF(this._countdown.toString(), res.flappy_ttf, 60);
+        this._countdownLabel = new cc.LabelTTF(this._countdown.toString(), "flappy", 100);
         this._countdownLabel.setPosition(winSize.width / 2, winSize.height / 2);
         this.addChild(this._countdownLabel);
 

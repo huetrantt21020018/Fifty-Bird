@@ -1,5 +1,5 @@
-PIPE_DISTANCE_X = 175;
-PIPE_DISTANCE_Y = 120;
+PIPE_DISTANCE_X = 180;
+PIPE_DISTANCE_Y = 140;
 PIPE_HEIGHT = 288;
 PIPE_WIDTH = 78;
 PADDING_X = 6;
@@ -33,8 +33,8 @@ var Pipe = cc.Sprite.extend({
 
     init:function (x) {
         var gap = PIPE_DISTANCE_Y + getRandomArbitrary(-20, 20);
-        TOP_MAX_Y = Math.min(3 * PIPE_HEIGHT / 2 + gap, MW.HEIGHT + PIPE_HEIGHT / 2) - 10;
-        TOP_MIN_Y = MW.HEIGHT - PIPE_HEIGHT / 2 + 10;
+        TOP_MAX_Y = Math.min(3 * PIPE_HEIGHT / 2 + gap, MW.HEIGHT + PIPE_HEIGHT / 2) - 20;
+        TOP_MIN_Y = MW.HEIGHT - PIPE_HEIGHT / 2 + 20;
 
         this.topPipe.setPosition(x, getRandomArbitrary(TOP_MIN_Y, TOP_MAX_Y));
         this.bottomPipe.setPosition(x, this.topPipe.y - PIPE_HEIGHT - gap);

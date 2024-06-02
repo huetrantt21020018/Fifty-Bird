@@ -10,41 +10,26 @@ var GameOver = cc.Layer.extend({
     init:function () {
         this.initBackGround();
 
-        var loseGame = new ccui.Text();
-        loseGame.attr({
-	        string: "OOF! YOU LOSE!",
-	        font: res.flappy_ttf,
-	        x: winSize.width  / 2,
-	        y: 270,
-	        fontSize: 30
+        var lostGame = new cc.LabelTTF("Oof! You lost!", "flappy", 48);
+        lostGame.attr({
+	        x: winSize.width / 2,
+	        y: winSize.height / 3 * 2,
         });
-        this.addChild(loseGame, 1);
+        this.addChild(lostGame, 10);
 
-        var scoreLabel = new ccui.Text();
-        scoreLabel.attr({
-	        font: res.flappy_ttf,
-	        x: winSize.width  / 2,
-	        y: winSize.height / 2,
-	        fontSize: 24
+        this.lbScore = new cc.LabelTTF("Score: " + this._score, "flappy", 24);
+        this.lbScore.attr({
+	        x: winSize.width / 2,
+	        y: winSize.height / 3 * 2 - 50,
         });
-        scoreLabel.setString("Score: " + this._score);
-        this.addChild(scoreLabel);
+        this.addChild(this.lbScore, 10);
 
-        var singalHeight = MW.menuHeight;
-        var singalWidth = MW.menuWidth;
-        var newGameText = new ccui.Text("Press Enter to Play Again", res.flappy_ttf, 20);
-
-        var newGame = new cc.MenuItemLabel(newGameText, function () {
-            this.onPlayAgain();
-        }, this);
-
-        newGame.scale = MW.SCALE;
-
-        var menu = new cc.Menu(newGame);
-        menu.alignItemsVerticallyWithPadding(15);
-        this.addChild(menu, 1, 2);
-        menu.x = winSize.width / 2;
-        menu.y = winSize.height / 2 - 140;
+        var newGame = new cc.LabelTTF("Press Enter to Play Again!", "flappy", 24);
+        newGame.attr({
+	        x: winSize.width / 2,
+	        y: winSize.height / 3,
+        });
+        this.addChild(newGame, 10);
 
         this.addKeyboardListener();
 

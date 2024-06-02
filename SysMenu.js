@@ -11,28 +11,22 @@ var SysMenu = cc.Layer.extend({
 
         this.initBackGround();
 
-        var nameGame = new ccui.Text("Fifty Bird", res.flappy_ttf, 48);
+        var nameGame = new cc.LabelTTF("Fifty Bird", "flappy", 48);
         nameGame.attr({
 	        x: winSize.width / 2,
-	        y: winSize.height / 2,
+	        y: winSize.height / 3 * 2,
         });
-        nameGame.setVisible(true);
         this.addChild(nameGame, 10);
 
         var singalHeight = MW.menuHeight;
         var singalWidth = MW.menuWidth;
 
-        var newGameText = new ccui.Text("Press Enter", res.flappy_ttf, 20);
-        var newGame = new cc.MenuItemLabel(newGameText, function () {
-            this.onNewGame();
-        }, this);
-        newGame.scale = MW.SCALE;
-
-        var menu = new cc.Menu(newGame);
-        menu.alignItemsVerticallyWithPadding(15);
-        this.addChild(menu, 1, 2);
-        menu.x = winSize.width / 2;
-        menu.y = winSize.height / 2 - 140;
+        var newGame = new cc.LabelTTF("Press Enter", "flappy", 24);
+        newGame.attr({
+	        x: winSize.width / 2,
+	        y: winSize.height / 3 * 2 - 50,
+        });
+        this.addChild(newGame, 10);
 
         /*cc.loader.load([res.marios_way], function (err, results) {
             if (err) {
