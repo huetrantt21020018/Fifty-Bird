@@ -18,7 +18,8 @@ var Pipe = cc.Sprite.extend({
     bottomPipe: null,
     _x: null,
     _isPassed: false,
-    _isFading: false,
+    _isFading: 0,
+    _blowStatus: 0,
 
     ctor:function (x) {
         this._super();
@@ -54,7 +55,8 @@ var Pipe = cc.Sprite.extend({
             this.bottomPipe.setRotation(0);
             this.bottomPipe.setOpacity(255);
 
-            this._isFading = false;
+            this._isFading = 0;
+            this._blowStatus = 0;
         }
     },
     update:function (dt) {
@@ -73,26 +75,32 @@ var Pipe = cc.Sprite.extend({
         this._x = this.topPipe.x;
     },
 
+    /*
+        blowStatus lưu lại thông tin cột nào bị va chạm và thổi bay
+        bit 0 của blowStatus bằng 1 nếu cần thực hiện hiệu ứng thổi bay cho cột trên
+        bit 1 của blowStatus bằng 1 nếu cần thực hiện hiệu ứng thổi bay cho cột dưới
+        isFading tương tự lưu thông tin cột nào đã bị thổi bay rồi
+        Chỉ cần thực hiện hiệu ứng trên cột nào có trạng thái bật bit ở blowStatus và tắt bit ở isFading
+    */
     isBlew: function (x, y) {
-        if(this._isFading) return false;
         var birdRect = cc.rect(x - BIRD_WIDTH * 2.5, y - BIRD_HEIGHT * 2.5, BIRD_WIDTH * 5, BIRD_HEIGHT * 5);
-        var pipeRect =  cc.rect(this._x - PIPE_WIDTH / 2, 0, PIPE_WIDTH, MW.HEIGHT);
-        if(cc.rectIntersectsRect(birdRect, pipeRect)) {
-            return true;
-        }
-        return false;
+        var topRect =  cc.rect(this._x - PIPE_WIDTH / 2, this.topPipe.y - PIPE_HEIGHT / 2, PIPE_WIDTH, PIPE_HEIGHT);
+        var bottomRect = cc.rect(this._x - PIPE_WIDTH / 2, this.bottomPipe.y - PIPE_HEIGHT / 2, PIPE_WIDTH, PIPE_HEIGHT);
+        this._blowStatus = (cc.rectIntersectsRect(birdRect, topRect) | (cc.rectIntersectsRect(birdRect, bottomRect) << 1));
+        return this._blowStatus;
     },
 
     blew: function(direction) {
-        this._isFading = true;
+        if((this._isFading | this._blowStatus) == this._isFading) return;
 
         var topFade = cc.fadeOut(ANIMATION_TIME);
         var botFade = cc.fadeOut(ANIMATION_TIME);
         var topRotate = cc.rotateBy(ANIMATION_TIME, direction * 45);
         var botRotate = cc.rotateBy(ANIMATION_TIME, -direction * 45);
 
-        this.topPipe.runAction(cc.spawn(topFade, topRotate));
-        this.bottomPipe.runAction(cc.spawn(botFade, botRotate));
+        if((~this._isFading & this._blowStatus) & 1) this.topPipe.runAction(cc.spawn(topFade, topRotate));
+        if((~this._isFading & this._blowStatus) >> 1) this.bottomPipe.runAction(cc.spawn(botFade, botRotate));
+        this._isFading |= this._blowStatus;
     },
 
     isCollide:function (x, y) {
@@ -121,3 +129,6 @@ var Pipe = cc.Sprite.extend({
         return (this._x + PIPE_WIDTH < 0);
     }
 });
+
+// suggest: background addChild pipe --> chỉ cần di chuyển background và pipe di chuyển theo
+// pipe và background có tốc độ khác nhau --> nên áp dụng như thế nào ??

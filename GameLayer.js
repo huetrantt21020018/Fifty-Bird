@@ -164,35 +164,46 @@ var GameLayer = cc.Layer.extend({
         }
     },
 
-    updatePipesAndScore: function () {
-        if(this._bird._powerStatus == MW.SKILL_STATUS.USING) {
-            // Đang sử dụng power skill --> các pipe trên đường đi bị blow
-            var prevPipe = (this._nextPipe - 1 + this._numberOfPipe) % this._numberOfPipe;
-            if(this._pipes[prevPipe].isBlew(this._bird.x, this._bird.y)) {
-                this._pipes[prevPipe].blew(1);
-            }
-            if (this._pipes[this._nextPipe].isBlew(this._bird.x, this._bird.y)) {
-                console.log("next pipe is blew");
-                this._pipes[this._nextPipe].blew(-1);
-                this._pipes[this._nextPipe].pass();
-                this.updateScore();
-                this._nextPipe = (this._nextPipe + 1) % this._numberOfPipe;
-            }
+    updateBlowPipe: function() {
+        var prevPipe = (this._nextPipe - 1 + this._numberOfPipe) % this._numberOfPipe;
+        if(this._pipes[prevPipe].isBlew(this._bird.x, this._bird.y)) {
+            this._pipes[prevPipe].blew(1);
         }
+        if (this._pipes[this._nextPipe].isBlew(this._bird.x, this._bird.y)) {
+            this._pipes[this._nextPipe].blew(-1);
+            this._pipes[this._nextPipe].pass();
+            this.updateScore();
+            this._nextPipe = (this._nextPipe + 1) % this._numberOfPipe;
+        }
+    },
 
-        // Kiểm tra đã vượt qua thêm cột gần nhất chưa?
+    updateNextPipeAndScore: function() {
         if(this._pipes[this._nextPipe].isPass(this._bird.x, this._bird.y)) {
             this._pipes[this._nextPipe].pass();
             this.updateScore();
             this._nextPipe = (this._nextPipe + 1) % this._numberOfPipe;
         }
+    },
 
-        // Kiểm tra cột đầu tiên vượt ra ngoài màn hình -> đưa cột đầu tiên xuống cuối
+    updateFirstPipe: function() {
         if(this._pipes[this._firstPipe].isOutOfScreen()) {
             this._pipes[this._firstPipe].init(this._pipes[this._lastPipe]._x + PIPE_DISTANCE_X + getRandomSlightly());
             this._lastPipe = this._firstPipe;
             this._firstPipe = (this._firstPipe + 1) % this._numberOfPipe;
         }
+    },
+
+    updatePipesAndScore: function () {
+        if(this._bird._powerStatus == MW.SKILL_STATUS.USING) {
+            // Đang sử dụng power skill --> các pipe trên đường đi bị blow
+            this.updateBlowPipe();
+        }
+
+        // Kiểm tra đã vượt qua thêm cột gần nhất chưa?
+        this.updateNextPipeAndScore();
+
+        // Kiểm tra cột đầu tiên vượt ra ngoài màn hình -> đưa cột đầu tiên xuống cuối
+        this.updateFirstPipe();
     },
 
     checkIsOver:function () {
@@ -223,7 +234,7 @@ var GameLayer = cc.Layer.extend({
 
         var sequence = cc.sequence(fall, delay, switchScene);
         this.runAction(sequence);
-    }
+    },
 });
 
 GameLayer.scene = function () {
