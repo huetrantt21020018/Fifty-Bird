@@ -1,7 +1,7 @@
 
 
 var CountdownLayer = cc.Layer.extend({
-    _countdown: 3,
+    _countdown: 5,
     _countdownLabel: null,
 
     ctor:function () {
@@ -48,10 +48,6 @@ var CountdownLayer = cc.Layer.extend({
     },
 
     onNewGame:function (pSender) {
-        // load resources
-        // cc.audioEngine.stopMusic();
-        // cc.audioEngine.stopAllEffects();
-        // cc.audioEngine.stopMusic();
         this.unscheduleAllCallbacks();
         this.removeAllChildren(true);
         cc.director.runScene(GameLayer.scene());

@@ -18,9 +18,6 @@ var SysMenu = cc.Layer.extend({
         });
         this.addChild(nameGame, 10);
 
-        var singalHeight = MW.menuHeight;
-        var singalWidth = MW.menuWidth;
-
         var newGame = new cc.LabelTTF("Press Enter", "flappy", 24);
         newGame.attr({
 	        x: winSize.width / 2,
@@ -28,15 +25,8 @@ var SysMenu = cc.Layer.extend({
         });
         this.addChild(newGame, 10);
 
-        /*cc.loader.load([res.marios_way], function (err, results) {
-            if (err) {
-                cc.log("Failed to load audio file: " + err);
-            } else {
-                cc.log("Audio file loaded successfully");
-                cc.audioEngine.setMusicVolume(0.2);
-                cc.audioEngine.playMusic(res.marios_way, true);
-            }
-        }); */
+        cc.audioEngine.setMusicVolume(0.3);
+        cc.audioEngine.playMusic(res.marios_way, true);
 
         this.addKeyboardListener();
 

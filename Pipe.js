@@ -9,6 +9,10 @@ function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
 }
 
+function getRandomSlightly() {
+    return getRandomArbitrary(-20, 20);
+}
+
 var Pipe = cc.Sprite.extend({
     topPipe: null,
     bottomPipe: null,
@@ -32,7 +36,7 @@ var Pipe = cc.Sprite.extend({
     },
 
     init:function (x) {
-        var gap = PIPE_DISTANCE_Y + getRandomArbitrary(-20, 20);
+        var gap = PIPE_DISTANCE_Y + getRandomSlightly();
         TOP_MAX_Y = Math.min(3 * PIPE_HEIGHT / 2 + gap, MW.HEIGHT + PIPE_HEIGHT / 2) - 20;
         TOP_MIN_Y = MW.HEIGHT - PIPE_HEIGHT / 2 + 20;
 
@@ -43,17 +47,20 @@ var Pipe = cc.Sprite.extend({
 
         if(this._isFading) {
             this.topPipe.stopAllActions();
+            this.topPipe.setRotation(0);
             this.topPipe.setOpacity(255);
 
             this.bottomPipe.stopAllActions();
+            this.bottomPipe.setRotation(0);
             this.bottomPipe.setOpacity(255);
+
             this._isFading = false;
         }
     },
     update:function (dt) {
         if(MW.STATE != MW.GAME_STATE.PLAYING) return;
         var deltaX = dt * GAME_SPEED;
-        if(deltaX > 3) {
+        if(deltaX > NORMAL_SPEED) {
             // using dash skill --> ease action
             var moveByT = cc.moveBy(dt, cc.p(-deltaX, 0));
             var moveByB = cc.moveBy(dt, cc.p(-deltaX, 0));
@@ -67,6 +74,7 @@ var Pipe = cc.Sprite.extend({
     },
 
     isBlew: function (x, y) {
+        if(this._isFading) return false;
         var birdRect = cc.rect(x - BIRD_WIDTH * 2.5, y - BIRD_HEIGHT * 2.5, BIRD_WIDTH * 5, BIRD_HEIGHT * 5);
         var pipeRect =  cc.rect(this._x - PIPE_WIDTH / 2, 0, PIPE_WIDTH, MW.HEIGHT);
         if(cc.rectIntersectsRect(birdRect, pipeRect)) {
@@ -75,14 +83,16 @@ var Pipe = cc.Sprite.extend({
         return false;
     },
 
-    blew: function() {
+    blew: function(direction) {
         this._isFading = true;
 
-        var anim1 = cc.fadeOut(0.2);
-        var anim2 = cc.fadeOut(0.2);
+        var topFade = cc.fadeOut(ANIMATION_TIME);
+        var botFade = cc.fadeOut(ANIMATION_TIME);
+        var topRotate = cc.rotateBy(ANIMATION_TIME, direction * 45);
+        var botRotate = cc.rotateBy(ANIMATION_TIME, -direction * 45);
 
-        this.topPipe.runAction(anim1);
-        this.bottomPipe.runAction(anim2);
+        this.topPipe.runAction(cc.spawn(topFade, topRotate));
+        this.bottomPipe.runAction(cc.spawn(botFade, botRotate));
     },
 
     isCollide:function (x, y) {

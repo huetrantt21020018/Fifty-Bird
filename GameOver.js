@@ -2,6 +2,7 @@
 var GameOver = cc.Layer.extend({
     _score:0,
 
+
     ctor:function(score){
         this._super();
         this._score = score;
@@ -13,21 +14,30 @@ var GameOver = cc.Layer.extend({
         var lostGame = new cc.LabelTTF("Oof! You lost!", "flappy", 48);
         lostGame.attr({
 	        x: winSize.width / 2,
-	        y: winSize.height / 3 * 2,
+	        y: winSize.height / 4 * 3,
         });
         this.addChild(lostGame, 10);
 
-        this.lbScore = new cc.LabelTTF("Score: " + this._score, "flappy", 24);
-        this.lbScore.attr({
-	        x: winSize.width / 2,
+        var lbScore = new cc.LabelTTF("Score: " + this._score, "flappy", 24);
+        lbScore.attr({
+	        x: this._score ? winSize.width / 2 + 60 : winSize.width / 2,
 	        y: winSize.height / 3 * 2 - 50,
         });
-        this.addChild(this.lbScore, 10);
+        this.addChild(lbScore, 10);
+
+        var medal = new Medal(this._score);
+        medal.attr({
+	        x: winSize.width / 2 - 60,
+	        y: winSize.height / 3 * 2 - 68,
+	        scaleX: 0.1,
+	        scaleY: 0.1,
+        });
+        this.addChild(medal, 9);
 
         var newGame = new cc.LabelTTF("Press Enter to Play Again!", "flappy", 24);
         newGame.attr({
 	        x: winSize.width / 2,
-	        y: winSize.height / 3,
+	        y: winSize.height / 4,
         });
         this.addChild(newGame, 10);
 
@@ -64,11 +74,6 @@ var GameOver = cc.Layer.extend({
     },
 
     onPlayAgain:function (pSender) {
-        //cc.audioEngine.stopMusic();
-        //cc.audioEngine.stopAllEffects();
-        this.unscheduleAllCallbacks();
-        this.removeAllChildren(true);
-        cc.eventManager.removeListeners(cc.EventListener.KEYBOARD);
         cc.audioEngine.playEffect(res.jump_wav);
         cc.director.runScene(CountdownLayer.scene());
     }

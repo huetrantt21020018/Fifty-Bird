@@ -61,7 +61,7 @@ var BackgroundLayer = cc.Sprite.extend({
     update:function (dt) {
         if(MW.STATE != MW.GAME_STATE.PLAYING && MW.STATE != MW.GAME_STATE.STARTING) return;
         deltaX = GAME_SPEED * dt / 2;
-        if(deltaX > 2) {
+        if(deltaX > NORMAL_SPEED) {
             // using power skill --> ease action
             var moveByBg1 = cc.moveBy(dt, cc.p(-deltaX, 0));
             var moveByBg2 = cc.moveBy(dt, cc.p(-deltaX, 0));

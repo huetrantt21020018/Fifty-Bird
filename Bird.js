@@ -19,6 +19,7 @@ var Bird = cc.Sprite.extend({
     idleAction: null,
     _dashStatus: MW.SKILL_STATUS.READY,
     _powerStatus: MW.SKILL_STATUS.READY,
+    _powerRemain: 0,
 
     ctor:function () {
         this._super(res.bird_png);
@@ -39,7 +40,7 @@ var Bird = cc.Sprite.extend({
             this._speed = 0;
         }, this);
 
-        var usingDash = cc.delayTime(0.24);
+        var usingDash = cc.delayTime(ANIMATION_TIME);
 
         var deactivateDash = cc.callFunc(function() {
              this._dashStatus = MW.SKILL_STATUS.NONE;
@@ -60,10 +61,11 @@ var Bird = cc.Sprite.extend({
         if(this._powerStatus != MW.SKILL_STATUS.READY) return;
 
         var activatePower = cc.callFunc(function() {
+            this._powerRemain = 5;
             this._powerStatus = MW.SKILL_STATUS.USING;
             GAME_SPEED = POWER_SPEED;
 
-            var zoomOutAction = cc.scaleTo(0.2, 5);
+            var zoomOutAction = cc.scaleTo(ANIMATION_TIME, 5);
             this.runAction(zoomOutAction);
         }, this);
 
@@ -73,7 +75,7 @@ var Bird = cc.Sprite.extend({
             this._powerStatus = MW.SKILL_STATUS.NONE;
             GAME_SPEED = INIT_SPEED;
 
-            var zoomInAction = cc.scaleTo(0.2, 1);
+            var zoomInAction = cc.scaleTo(ANIMATION_TIME, 1);
             this.runAction(zoomInAction);
         }, this);
 
@@ -108,6 +110,9 @@ var Bird = cc.Sprite.extend({
         if(this._powerStatus != MW.SKILL_STATUS.USING) newY = Math.min(newY, MAX_BIRD_Y);
         else newY = Math.max(Math.min(newY, MAX_BIRD_POWER_Y), MIN_BIRD_POWER_Y);
         this.y = newY;
+
+        // Cập nhật thời gian còn lại được sử dụng power
+        this._powerRemain = Math.max(0, this._powerRemain - dt);
     },
 
     changeDirection: function() {
@@ -121,7 +126,7 @@ var Bird = cc.Sprite.extend({
     },
 
     fall:function () {
-        var rotateTo = cc.rotateTo(0.1, MAX_ANGLE);
+        var rotateTo = cc.rotateTo(ANIMATION_TIME, MAX_ANGLE);
         this.runAction(rotateTo);
         var fallAction = cc.moveTo(1, cc.p(this.x, Math.min(MIN_BIRD_Y, this.y))).easing(cc.easeExponentialIn());
         this.runAction(fallAction);

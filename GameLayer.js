@@ -34,7 +34,7 @@ var GameLayer = cc.Layer.extend({
             var pipe = new Pipe(curX);
             this._pipes.push(pipe);
             this.addChild(pipe);
-            curX += PIPE_DISTANCE_X + getRandomArbitrary(-25, 25);
+            curX += PIPE_DISTANCE_X + getRandomSlightly();
         }
         this._nextPipe = 0;
         this._firstPipe = 0;
@@ -53,7 +53,7 @@ var GameLayer = cc.Layer.extend({
         // score
         this.lbScore = new cc.LabelTTF("Score: 0", "flappy", 24);
         this.lbScore.attr({
-            x: 90,
+            x: 100,
             y: MW.HEIGHT - 36
         });
         this.addChild(this.lbScore, 10);
@@ -61,7 +61,7 @@ var GameLayer = cc.Layer.extend({
         // Dash
         this.lbDash = new cc.LabelTTF("Dash", "flappy", 15);
         this.lbDash.attr({
-            x: 90,
+            x: 100,
             y: MW.HEIGHT - 70
         });
         this.lbDash.setVisible(false);
@@ -70,7 +70,7 @@ var GameLayer = cc.Layer.extend({
         // Power
         this.lbPower = new cc.LabelTTF("Power", "flappy", 15);
         this.lbPower.attr({
-            x: 90,
+            x: 100,
             y: MW.HEIGHT - 100
         });
         this.lbPower.setVisible(false);
@@ -79,7 +79,7 @@ var GameLayer = cc.Layer.extend({
         // pause
         this.lbPause = new cc.LabelTTF("Paused", "flappy", 15);
         this.lbPause.attr({
-            x:  90,
+            x:  100,
             y: MW.HEIGHT - 130
         });
         this.lbPause.setVisible(false);
@@ -131,15 +131,13 @@ var GameLayer = cc.Layer.extend({
     },
 
     update:function (dt) {
-        this.lbDash.setVisible(this._bird._dashStatus == MW.SKILL_STATUS.READY);
-        this.lbPower.setVisible(this._bird._powerStatus == MW.SKILL_STATUS.READY);
-
         if (MW.STATE == MW.GAME_STATE.PLAYING) {
             this.updatePipesAndScore();
+            this.updateLabel();
             if(this.checkIsOver()) {
                 MW.STATE = MW.GAME_STATE.GAME_OVER;
                 this.runAction(cc.sequence(
-                    cc.delayTime(0.001),
+                    cc.delayTime(0.01),
                     cc.callFunc(this.onGameOver(), this)
                 ));
             }
@@ -152,14 +150,30 @@ var GameLayer = cc.Layer.extend({
         cc.audioEngine.playEffect(res.score_wav);
         cc.audioEngine.setMusicVolume(0.7);
         this._score += 1;
+    },
+
+    updateLabel: function () {
+        this.lbDash.setVisible(this._bird._dashStatus == MW.SKILL_STATUS.READY);
+        this.lbPower.setVisible(this._bird._powerStatus != MW.SKILL_STATUS.NONE);
         this.lbScore.setString("Score: " + this._score);
+
+        if(this._bird._powerStatus == MW.SKILL_STATUS.USING) {
+            this.lbPower.setString("Power remaining: " + this._bird._powerRemain.toFixed(1) + " s");
+        } else if(this._bird._powerStatus == MW.SKILL_STATUS.READY) {
+            this.lbPower.setString("Power");
+        }
     },
 
     updatePipesAndScore: function () {
         if(this._bird._powerStatus == MW.SKILL_STATUS.USING) {
             // Đang sử dụng power skill --> các pipe trên đường đi bị blow
+            var prevPipe = (this._nextPipe - 1 + this._numberOfPipe) % this._numberOfPipe;
+            if(this._pipes[prevPipe].isBlew(this._bird.x, this._bird.y)) {
+                this._pipes[prevPipe].blew(1);
+            }
             if (this._pipes[this._nextPipe].isBlew(this._bird.x, this._bird.y)) {
-                this._pipes[this._nextPipe].blew();
+                console.log("next pipe is blew");
+                this._pipes[this._nextPipe].blew(-1);
                 this._pipes[this._nextPipe].pass();
                 this.updateScore();
                 this._nextPipe = (this._nextPipe + 1) % this._numberOfPipe;
@@ -175,7 +189,7 @@ var GameLayer = cc.Layer.extend({
 
         // Kiểm tra cột đầu tiên vượt ra ngoài màn hình -> đưa cột đầu tiên xuống cuối
         if(this._pipes[this._firstPipe].isOutOfScreen()) {
-            this._pipes[this._firstPipe].init(this._pipes[this._lastPipe]._x + PIPE_DISTANCE_X + getRandomArbitrary(-20, 20));
+            this._pipes[this._firstPipe].init(this._pipes[this._lastPipe]._x + PIPE_DISTANCE_X + getRandomSlightly());
             this._lastPipe = this._firstPipe;
             this._firstPipe = (this._firstPipe + 1) % this._numberOfPipe;
         }
@@ -200,11 +214,10 @@ var GameLayer = cc.Layer.extend({
             this._bird.fall();
         }, this);
 
-        var delay = cc.delayTime(1.2);
+        var delay = cc.delayTime(1);
 
         var switchScene = cc.callFunc(function() {
             this.unscheduleUpdate();
-            this.removeAllChildren(true);
             cc.director.runScene(GameOver.scene(this._score));
         }, this);
 

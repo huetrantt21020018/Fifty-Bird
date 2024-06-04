@@ -12,6 +12,10 @@ var res = {
     bird_png : 'res/bird.png',
     background_png : 'res/background.png',
 
+    gold_medal_png : 'res/gold_medal.png',
+    sliver_medal_png : 'res/sliver_medal.png',
+    bronze_medal_png : 'res/bronze_medal.png',
+
     flappy_ttf : 'res/fonts/flappy.ttf',
     font_ttf : 'res/fonts/font.ttf',
 };
